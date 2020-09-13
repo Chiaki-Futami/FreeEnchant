@@ -4,9 +4,10 @@ using Oc;
 using Oc.Item;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
+using System.Threading;
 using UnityEngine;
 
 namespace FreeEnchant
@@ -19,7 +20,7 @@ namespace FreeEnchant
 
         public const string PLUGIN_GUID = "craftopia.misc.free_enchant";
         public const string PLUGIN_NAME = "FreeEnchant";
-        public const string PLUGIN_VER = "1.0.0.0";
+        public const string PLUGIN_VER = "1.1.0.0";
 
         private const string PROCESS_NAME = "Craftopia.exe";
 
@@ -27,18 +28,7 @@ namespace FreeEnchant
 
         private const int MAX_COLUMN_LENGTH = 5;
 
-        private const float GROUP_MARGIN_WIDTH = 10f;
-        private const float GROUP_MARGIN_HEIGHT = 10f;
-
-        private const String TEXT_COMMON = "コモン";
-        private const String TEXT_UNCOMMON = "アンコモン";
-        private const String TEXT_RARE = "レア";
-        private const String TEXT_SUPER_RARE = "スーパーレア";
-        private const String TEXT_ULTRA_RARE = "ウルトラレア";
-        private const String TEXT_EPIC = "エピック";
-        private const String TEXT_LEGENDARY = "レジェンダリー";
-        private const String TEXT_OVER_LEGENDARY = "オーバーレジェンダリー";
-
+        private const string TEXT_HALF_BLANK = " ";
         #endregion
 
         #region ウィンドウ設定値
@@ -78,9 +68,15 @@ namespace FreeEnchant
 
         void Awake()
         {
+            //check culture and set en, if not ja.
+            if (!Thread.CurrentThread.CurrentUICulture.Name.StartsWith("ja") &&
+                 !Thread.CurrentThread.CurrentUICulture.Name.StartsWith("en"))
+            {
+                Thread.CurrentThread.CurrentUICulture = new CultureInfo("en", false);
+            }
 
-            Logger.LogInfo(PLUGIN_NAME + " バージョン " + PLUGIN_VER);
-            Logger.LogInfo(PLUGIN_NAME + " 読み込み開始");
+            OutputLog(LogLevel.Info, PLUGIN_NAME + TEXT_HALF_BLANK + GetCultureString("Version") + TEXT_HALF_BLANK + PLUGIN_VER);
+            OutputLog(LogLevel.Info, PLUGIN_NAME + TEXT_HALF_BLANK + GetCultureString("LoadStart"));
 
             try
             {
@@ -93,11 +89,11 @@ namespace FreeEnchant
             }
             catch (Exception ex)
             {
-                Logger.LogWarning("エラー:" + ex.Message.ToString());
+                OutputLog(LogLevel.Warning, GetCultureString("Error") + ex.Message.ToString());
             }
             finally
             {
-                Logger.LogInfo(PLUGIN_NAME + " 読み込み完了");
+                OutputLog(LogLevel.Info, PLUGIN_NAME + TEXT_HALF_BLANK + GetCultureString("LoadEnd"));
             }
         }
 
@@ -146,10 +142,10 @@ namespace FreeEnchant
 
                 GUILayout.BeginVertical();
                 DrawCenteredLabel(String.Empty);
-                DrawCenteredLabel("付与するエンチャントを4つまで選択して、確定を押下してください。", textStyle);
-                DrawCenteredLabel("選択中のエンチャントは赤文字表示され、再度選択すると解除されます。", textStyle);
+                DrawCenteredLabel(GetCultureString("TopLabel1"), textStyle);
+                DrawCenteredLabel(GetCultureString("TopLabel2"), textStyle);
                 DrawCenteredLabel(String.Empty);
-
+                
                 var selectString = new List<string>();
 
                 foreach (var keyValuePair in selectedEncDic)
@@ -176,7 +172,7 @@ namespace FreeEnchant
                 applyStyle.normal.textColor = Color.cyan;
 
                 GUILayout.BeginHorizontal(GUI.skin.box);
-                DrawCenteredLabel("現在選択中のエンチャント：" + String.Join(", ", selectString), textStyle2);
+                DrawCenteredLabel(GetCultureString("SelectingEnchant") + String.Join(", ", selectString), textStyle2);
                 GUILayout.EndHorizontal();
 
                 DrawCenteredLabel(String.Empty);
@@ -184,18 +180,18 @@ namespace FreeEnchant
                 GUILayout.BeginHorizontal();
                 GUILayout.FlexibleSpace();
 
-                if (GUILayout.Button("確定", applyStyle))
+                if (GUILayout.Button(GetCultureString("ApplyButton"), applyStyle))
                     DoEnchant();
 
                 GUILayout.FlexibleSpace();
 
-                if (GUILayout.Button("閉じる"))
+                if (GUILayout.Button(GetCultureString("CloseButton")))
                     CloseWindow();
 
                 GUILayout.FlexibleSpace();
                 GUILayout.EndHorizontal();
 
-                //ここからエンチャントボタン作成
+                //create enchant buttons dynamically
                 foreach (EnchantRarity rarity in Enum.GetValues(typeof(EnchantRarity)))
                 {
                     DrawCenteredLabel(String.Empty);
@@ -208,9 +204,9 @@ namespace FreeEnchant
                 GUILayout.EndVertical();
                 GUILayout.EndScrollView();
             }
-            catch
+            catch (Exception ex)
             {
-
+                OutputLog(LogLevel.Warning, GetCultureString("Error") + ex.Message.ToString());
             }
         }
 
@@ -231,46 +227,46 @@ namespace FreeEnchant
                 switch (value)
                 {
                     case EnchantRarity.Common:
-                        name = TEXT_COMMON;
+                        name = GetCultureString("Rarity_Common");
                         styleState.textColor = textColorCommon;
                         break;
 
                     case EnchantRarity.Uncommon:
-                        name = TEXT_UNCOMMON;
+                        name = GetCultureString("Rarity_Uncommon");
                         styleState.textColor = textColorRare;
                         break;
                     case EnchantRarity.Rare:
-                        name = TEXT_RARE;
+                        name = GetCultureString("Rarity_Rare");
                         styleState.textColor = textColorRare;
                         break;
 
                     case EnchantRarity.SuperRare:
-                        name = TEXT_SUPER_RARE;
+                        name = GetCultureString("Rarity_SuperRare");
                         styleState.textColor = textColorSuperRare;
                         break;
 
                     case EnchantRarity.UltraRare:
-                        name = TEXT_ULTRA_RARE;
+                        name = GetCultureString("Rarity_UltraRare");
                         styleState.textColor = textColorSuperRare;
                         break;
 
                     case EnchantRarity.Epic:
-                        name = TEXT_EPIC;
+                        name = GetCultureString("Rarity_Epic");
                         styleState.textColor = textColorEpic;
                         break;
 
                     case EnchantRarity.Legendary:
-                        name = TEXT_LEGENDARY;
+                        name = GetCultureString("Rarity_Legendary");
                         styleState.textColor = textColorLegendary;
                         break;
 
                     case EnchantRarity.OverLegendary:
-                        name = TEXT_OVER_LEGENDARY;
+                        name = GetCultureString("Rarity_OverLegendary");
                         styleState.textColor = textColorLegendary;
                         break;
 
                     default:
-                        name = "レアリティ不明";
+                        name = GetCultureString("Rarity_Unknown");
                         styleState.textColor = textColorCommon;
                         break;
                 }
@@ -285,7 +281,7 @@ namespace FreeEnchant
                 int count = 1;
                 foreach (var data in encList.Where(x => x.Rarity == value))
                 {
-                    //選択済みの物は赤にする
+                    //make selected encs red
                     var style = new GUIStyle(GUI.skin.button)
                     {
                         richText = true
@@ -323,9 +319,9 @@ namespace FreeEnchant
                 GUILayout.EndVertical();
 
             }
-            catch
+            catch (Exception ex)
             {
-
+                OutputLog(LogLevel.Warning, GetCultureString("Error") + ex.Message.ToString());
             }
         }
 
@@ -335,7 +331,7 @@ namespace FreeEnchant
             {
                 if (selectedEncDic.ContainsKey(enc.ID))
                 {
-                    //すでに含まれている場合、削除する
+                    //already included, delete
                     selectedEncDic.Remove(enc.ID);
                 }
                 else
@@ -346,9 +342,9 @@ namespace FreeEnchant
                     }
                 }
             }
-            catch
+            catch (Exception ex)
             {
-
+                OutputLog(LogLevel.Warning, GetCultureString("Error") + ex.Message.ToString());
             }
         }
 
@@ -380,9 +376,9 @@ namespace FreeEnchant
                 Cursor.lockState = CursorLockMode.Locked;
                 Cursor.visible = false;
             }
-            catch
+            catch (Exception ex)
             {
-
+                OutputLog(LogLevel.Warning, GetCultureString("Error") + ex.Message.ToString());
             }
         }
 
@@ -398,9 +394,43 @@ namespace FreeEnchant
                 Cursor.lockState = CursorLockMode.Locked;
                 Cursor.visible = false;
             }
-            catch
+            catch (Exception ex)
             {
+                OutputLog(LogLevel.Warning, GetCultureString("Error") + ex.Message.ToString());
+            }
+        }
 
+        private string GetCultureString(string name) 
+        {
+            return Properties.Resources.ResourceManager.GetString(name) ?? "";
+        }
+
+        public enum LogLevel
+        {
+            Info = 0,
+            Warning = 1,
+            Debug = 2,
+            Error = 9,
+        }
+
+        public void OutputLog(LogLevel logLevel, string logString)
+        {
+            switch (logLevel)
+            {
+                case LogLevel.Info:
+                    Logger.LogInfo(logString);
+                    break;
+                case LogLevel.Warning:
+                    Logger.LogWarning(logString);
+                    break;
+                case LogLevel.Debug:
+                    Logger.LogDebug(logString);
+                    break;
+                case LogLevel.Error:
+                    Logger.LogError(logString);
+                    break;
+                default:
+                    return;
             }
         }
     }

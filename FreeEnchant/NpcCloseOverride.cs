@@ -22,7 +22,6 @@ namespace FreeEnchant
 
                 if (!chestItemList.checkIsEmpty())
                 {
-                    //OnGUIで流すためのフラグ立て
                     Plugin.WindowState = true;
                 }
             }

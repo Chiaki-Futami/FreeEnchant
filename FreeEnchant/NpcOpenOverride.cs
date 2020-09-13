@@ -37,7 +37,6 @@ namespace FreeEnchant
 
                             OcItem ocItem = ocItemDataMng.CreateItem(chestItem.Id, chestItem.Level, enchantArray);
 
-                            //エンチャントのソート
                             ocItem.SortEnchantSlot();
                             itemArray[i] = ocItem;
                         }
