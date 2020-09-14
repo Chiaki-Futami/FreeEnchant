@@ -20,7 +20,7 @@ namespace FreeEnchant
 
         public const string PLUGIN_GUID = "craftopia.misc.free_enchant";
         public const string PLUGIN_NAME = "FreeEnchant";
-        public const string PLUGIN_VER = "1.1.0.0";
+        public const string PLUGIN_VER = "1.1.1.0";
 
         private const string PROCESS_NAME = "Craftopia.exe";
 
