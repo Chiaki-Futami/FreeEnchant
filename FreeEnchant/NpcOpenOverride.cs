@@ -20,12 +20,12 @@ namespace FreeEnchant
                 {
 
                     var chestItemList = Traverse.Create(__instance).Field("_ChestItemList").GetValue<OcItem_ChestItemList>();
-                    int chestSize = chestItemList.ChestSize;
+                    int chestSize = (chestItemList?.ChestSize) ?? 0;
 
                     var inventoryMng = SingletonMonoBehaviour<OcItemUI_InventoryMng>.Inst;
                     var ocItemDataMng = SingletonMonoBehaviour<OcItemDataMng>.Inst;
 
-                    if (SingletonMonoBehaviour<OcNetMng>.Inst.needEmLocalCtrl() && chestItemList.Item.Length != 0)
+                    if (chestItemList != null && chestItemList.Item.Length != 0)
                     {
 
                         OcItem[] itemArray = new OcItem[chestSize];
